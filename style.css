@@ -1,0 +1,41 @@
+/* Custom CSS bổ trợ cho Flip Animation và Typography hóa học */
+
+/* Chống chọn text và zoom ngoài ý muốn trên thiết bị di động */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  touch-action: manipulation;
+}
+
+/* Kiểu chữ hóa học (chỉ số trên phân lớp e, ví dụ 1s²) */
+.chem-sub {
+  font-feature-settings: "sups";
+}
+
+/* Dynamic Flip Animation cho Leaderboard khi đổi hạng */
+.leaderboard-item {
+  transition: all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: transform, opacity;
+}
+
+/* Đổi màu thanh Progress bar mượt mà */
+.bg-progress-green {
+  background-color: #10b981;
+}
+.bg-progress-yellow {
+  background-color: #f59e0b;
+}
+.bg-progress-red {
+  background-color: #ef4444;
+}
+
+/* Hiệu ứng nhịp đập khi còn dưới 5 giây */
+@keyframes urgent-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+.timer-urgent {
+  animation: urgent-pulse 0.7s infinite;
+}

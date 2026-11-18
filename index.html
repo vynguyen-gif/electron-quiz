@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Giải Mã Cấu Hình Electron - EdTech Quiz</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+  
+  <!-- Supabase JS Client v2 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- QRCode.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-['Plus_Jakarta_Sans',sans-serif] selection:bg-indigo-500 selection:text-white">
+
+  <!-- ========================================== -->
+  <!-- 1. TEACHER VIEW (?view=teacher)            -->
+  <!-- ========================================== -->
+  <main id="teacher-view" class="hidden min-h-screen flex-col p-6 lg:p-10 max-w-7xl mx-auto w-full">
+    <!-- Header -->
+    <header class="flex justify-between items-center border-b border-slate-800 pb-5 mb-8">
+      <div>
+        <span class="inline-block px-3 py-1 bg-indigo-500/20 text-indigo-400 text-xs font-bold rounded-full mb-2 uppercase tracking-widest">Giáo viên - Màn hình trực tiếp</span>
+        <h1 class="text-3xl lg:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-cyan-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
+          ⚡ Giải Mã Cấu Hình Electron
+        </h1>
+      </div>
+      <div id="teacher-status-badge" class="flex items-center gap-2 bg-slate-800/80 px-4 py-2 rounded-xl border border-slate-700">
+        <span class="w-3 h-3 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span class="text-sm font-semibold text-slate-300">Đang lắng nghe dữ liệu</span>
+      </div>
+    </header>
+
+    <!-- Màn hình 1: Lobby chờ học sinh -->
+    <section id="teacher-lobby" class="flex-1 flex flex-col lg:flex-row items-center justify-center gap-12 my-auto">
+      <div class="bg-slate-800/60 p-8 rounded-3xl border border-slate-700/80 shadow-2xl flex flex-col items-center text-center max-w-md w-full">
+        <h2 class="text-xl font-bold mb-3 text-slate-200">Quét mã QR để tham gia</h2>
+        <div id="qrcode-container" class="bg-white p-4 rounded-2xl shadow-inner mb-4 flex items-center justify-center min-w-[200px] min-h-[200px]"></div>
+        <p class="text-xs text-slate-400 break-all px-2 font-mono" id="student-join-url"></p>
+      </div>
+
+      <div class="flex flex-col items-center lg:items-start text-center lg:text-left space-y-6 max-w-lg">
+        <div class="bg-slate-800/40 border border-slate-700 px-6 py-4 rounded-2xl w-full">
+          <p class="text-slate-400 text-sm font-medium uppercase tracking-wider">Học sinh đã kết nối</p>
+          <div class="text-6xl font-black text-cyan-400 font-['JetBrains_Mono'] mt-1" id="connected-count">0</div>
+        </div>
+        <p class="text-slate-300 text-base leading-relaxed">
+          Yêu cầu học sinh bật camera điện thoại quét mã QR hoặc truy cập đường link để nhập tên. Khi cả lớp đã sẵn sàng, bấm nút bên dưới.
+        </p>
+        <button id="btn-start-quiz" class="w-full py-4 px-8 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-bold text-lg rounded-2xl shadow-lg shadow-indigo-500/25 transition-all transform active:scale-98">
+          🚀 Mở Bảng Điểm Trực Tiếp
+        </button>
+      </div>
+    </section>
+
+    <!-- Màn hình 2: Dynamic Live Leaderboard -->
+    <section id="teacher-leaderboard" class="hidden flex-1 flex-col">
+      <div class="flex justify-between items-end mb-6">
+        <div>
+          <h2 class="text-2xl font-bold text-slate-100 flex items-center gap-2">
+            🏆 Bảng Xếp Hạng Top 5 (Realtime)
+          </h2>
+          <p class="text-sm text-slate-400">Tự động sắp xếp theo điểm số và thời gian trả lời</p>
+        </div>
+        <div class="text-right">
+          <button id="btn-reset-session" class="text-xs text-slate-400 hover:text-rose-400 transition underline">
+            Làm mới phiên chơi
+          </button>
+        </div>
+      </div>
+
+      <!-- Container danh sách Top 5 -->
+      <div id="leaderboard-list" class="space-y-3 relative w-full max-w-4xl mx-auto">
+        <!-- Render bằng JS -->
+      </div>
+    </section>
+  </main>
+
+
+  <!-- ========================================== -->
+  <!-- 2. STUDENT VIEW (Mobile-First)             -->
+  <!-- ========================================== -->
+  <main id="student-view" class="flex-1 flex flex-col p-4 max-w-md mx-auto w-full justify-center">
+
+    <!-- Screen 1: Nhập họ tên -->
+    <section id="student-screen-name" class="w-full bg-slate-800/80 p-6 rounded-3xl border border-slate-700/80 shadow-2xl">
+      <div class="text-center mb-6">
+        <div class="w-16 h-16 bg-indigo-500/20 text-indigo-400 rounded-2xl mx-auto flex items-center justify-center text-3xl font-bold mb-3 border border-indigo-500/30">
+          ⚛️
+        </div>
+        <h1 class="text-2xl font-extrabold text-white">Giải Mã Cấu Hình</h1>
+        <p class="text-xs text-slate-400 mt-1">Đấu trường Hóa học thời gian thực</p>
+      </div>
+
+      <form id="form-join" class="space-y-4" onsubmit="event.preventDefault();">
+        <div>
+          <label for="input-student-name" class="block text-xs font-semibold uppercase text-slate-300 tracking-wider mb-2">
+            Họ và tên của bạn
+          </label>
+          <input 
+            type="text" 
+            id="input-student-name" 
+            placeholder="Ví dụ: Nguyễn Văn An - 10A1" 
+            required 
+            maxlength="35"
+            class="w-full px-4 py-3.5 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent text-base transition"
+          />
+        </div>
+        <button 
+          type="submit" 
+          id="btn-join-submit"
+          class="w-full py-4 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 active:scale-95 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/20 transition text-base"
+        >
+          Vào Trận Đấu
+        </button>
+      </form>
+    </section>
+
+    <!-- Screen 2: Trả lời câu hỏi -->
+    <section id="student-screen-question" class="hidden w-full flex-col">
+      <!-- Info Header -->
+      <div class="flex justify-between items-center mb-3">
+        <span id="question-progress" class="text-xs font-bold text-slate-400 tracking-wider uppercase">Câu 1/5</span>
+        <span class="text-xs font-semibold px-2.5 py-1 bg-indigo-500/20 text-indigo-300 rounded-lg">
+          Điểm hiện tại: <strong id="student-current-score" class="font-mono text-cyan-300">0</strong>
+        </span>
+      </div>
+
+      <!-- Progress Bar (Xanh -> Vàng -> Đỏ) -->
+      <div class="w-full bg-slate-800 rounded-full h-3 mb-5 overflow-hidden p-0.5 border border-slate-700">
+        <div id="time-progress-bar" class="h-full rounded-full bg-emerald-400 transition-all duration-100 ease-linear" style="width: 100%;"></div>
+      </div>
+
+      <!-- Question Box -->
+      <div class="bg-slate-800/90 border border-slate-700/80 p-5 rounded-2xl shadow-xl mb-5">
+        <p class="text-xs text-indigo-400 font-bold uppercase tracking-wider mb-1">Cấu hình electron:</p>
+        <h3 id="question-text" class="text-lg font-bold text-white leading-snug font-['JetBrains_Mono',monospace]">
+          <!-- Nội dung câu hỏi dạng 1s²2s²2p⁶ -->
+        </h3>
+      </div>
+
+      <!-- 4 Option Buttons -->
+      <div class="grid grid-cols-1 gap-3" id="options-container">
+        <!-- Render 4 nút A, B, C, D qua JS -->
+      </div>
+    </section>
+
+    <!-- Screen 3 & 4: Modal Feedback & Màn hình chờ câu hỏi -->
+    <section id="student-screen-feedback" class="hidden w-full flex-col items-center bg-slate-800/90 border border-slate-700 p-6 rounded-3xl shadow-2xl text-center">
+      <div id="feedback-icon-box" class="w-20 h-20 rounded-full flex items-center justify-center text-4xl mb-4 border-2">
+        <!-- Biểu tượng Đúng/Sai -->
+      </div>
+      <h3 id="feedback-title" class="text-2xl font-black mb-1">
+        <!-- Chính xác / Chưa chính xác -->
+      </h3>
+      <p id="feedback-score-gained" class="text-sm font-semibold text-cyan-300 mb-4 font-mono">
+        +0 điểm
+      </p>
+
+      <!-- Giải thích hóa học -->
+      <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-xl text-left w-full mb-6">
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-1">Bản chất hóa học:</p>
+        <p id="feedback-explanation" class="text-sm text-slate-200 leading-relaxed font-normal">
+          <!-- Text giải thích cấu hình -->
+        </p>
+      </div>
+
+      <!-- Điểm cá nhân tổng & Nút tiếp tục -->
+      <div class="w-full flex items-center justify-between border-t border-slate-700/60 pt-4">
+        <div class="text-left">
+          <p class="text-xs text-slate-400">Tổng điểm tích lũy</p>
+          <p id="student-total-score" class="text-xl font-black text-amber-400 font-mono">0</p>
+        </div>
+        <button id="btn-next-question" class="py-3 px-6 bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-bold rounded-xl shadow-lg transition text-sm">
+          Tiếp tục ➔
+        </button>
+      </div>
+    </section>
+
+    <!-- Screen 5: Tổng kết kết thúc trò chơi -->
+    <section id="student-screen-finished" class="hidden w-full flex-col items-center bg-slate-800/90 border border-slate-700 p-8 rounded-3xl shadow-2xl text-center">
+      <div class="text-5xl mb-3">🎉</div>
+      <h3 class="text-2xl font-black text-white mb-2">Hoàn Thành Xuất Sắc!</h3>
+      <p class="text-sm text-slate-300 mb-6">Bạn đã giải mã toàn bộ các cấu hình electron của đợt thử thách này.</p>
+      
+      <div class="bg-slate-900/80 border border-slate-800 p-6 rounded-2xl w-full mb-6">
+        <p class="text-xs text-slate-400 uppercase tracking-wider mb-1">Điểm chung cuộc của bạn</p>
+        <p id="final-student-score" class="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-yellow-500 font-mono">0</p>
+      </div>
+      <p class="text-xs text-slate-400">Hãy theo dõi màn hình chính của giáo viên để xem thứ hạng Top 5 của lớp!</p>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

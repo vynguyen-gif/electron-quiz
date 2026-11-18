@@ -52,3 +52,12 @@
 const SUPABASE_URL = "https://YOUR_PROJECT_REF.supabase.co";
 const SUPABASE_ANON_KEY = "YOUR_ANON_PUBLIC_KEY";
 ```
+
+---
+
+## 👨‍🏫 Tác giả & Ban biên soạn
+* **GV Phùng Tân Hùng**
+* **GV Nguyễn Vỹ**
+
+*Ứng dụng được thiết kế và phát triển phục vụ công tác đổi mới phương pháp giảng dạy Hóa học theo định hướng EdTech tương tác thời gian thực.*
+

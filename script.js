@@ -174,6 +174,20 @@
     }
   }
 
+  function sortLeaderboard(list) {
+    if (!Array.isArray(list)) return [];
+    return list.slice().sort((a, b) => {
+      const scoreA = Number(a.score) || 0;
+      const scoreB = Number(b.score) || 0;
+      if (scoreB !== scoreA) {
+        return scoreB - scoreA; // Điểm cao hơn luôn đứng trước (Hạng 1)
+      }
+      const timeA = new Date(a.last_answered_at || 0).getTime();
+      const timeB = new Date(b.last_answered_at || 0).getTime();
+      return timeA - timeB; // Cùng điểm thì ai xong trước xếp trước
+    });
+  }
+
   async function setupTeacherRealtime() {
     if (!sbClient) {
       // Demo mode: lắng nghe storage
@@ -182,10 +196,10 @@
         if (local) {
           try {
             const list = JSON.parse(local);
-            currentLeaderboard = list;
+            currentLeaderboard = sortLeaderboard(list);
             const countEl = document.getElementById("connected-count");
             if (countEl) countEl.innerText = list.length;
-            renderLeaderboard(list.slice(0, 5));
+            renderLeaderboard(currentLeaderboard);
           } catch (_) {}
         }
       };
@@ -217,8 +231,8 @@
     if (!sbClient) {
       const local = localStorage.getItem("chem_demo_leaderboard");
       if (local) {
-        currentLeaderboard = JSON.parse(local);
-        renderLeaderboard(currentLeaderboard.slice(0, 5));
+        currentLeaderboard = sortLeaderboard(JSON.parse(local));
+        renderLeaderboard(currentLeaderboard);
       }
       return;
     }
@@ -231,7 +245,7 @@
       .limit(5);
 
     if (!error && data) {
-      currentLeaderboard = data;
+      currentLeaderboard = sortLeaderboard(data);
       renderLeaderboard(currentLeaderboard);
     }
   }
@@ -244,19 +258,17 @@
       currentLeaderboard.push(record);
     }
 
-    currentLeaderboard.sort((a, b) => {
-      if (b.score !== a.score) return b.score - a.score;
-      return new Date(a.last_answered_at) - new Date(b.last_answered_at);
-    });
-
-    renderLeaderboard(currentLeaderboard.slice(0, 5));
+    currentLeaderboard = sortLeaderboard(currentLeaderboard);
+    renderLeaderboard(currentLeaderboard);
   }
 
   function renderLeaderboard(list) {
     const container = document.getElementById("leaderboard-list");
     if (!container) return;
 
-    if (list.length === 0) {
+    const sortedList = sortLeaderboard(list).slice(0, 5);
+
+    if (sortedList.length === 0) {
       container.innerHTML = `
         <div class="text-center py-12 text-slate-500 text-sm">
           Chưa có dữ liệu học sinh trả lời...
@@ -273,7 +285,7 @@
       "from-slate-800 to-slate-800/60 border-slate-700 text-slate-300"
     ];
 
-    container.innerHTML = list.map((student, idx) => {
+    container.innerHTML = sortedList.map((student, idx) => {
       return `
         <div class="leaderboard-item flex items-center justify-between p-4 rounded-2xl bg-gradient-to-r ${rankColors[idx] || rankColors[3]} border backdrop-blur-md shadow-md">
           <div class="flex items-center gap-4">

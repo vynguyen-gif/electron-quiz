@@ -105,10 +105,10 @@
   <!-- ========================================== -->
   <!-- 2. STUDENT VIEW (Mobile-First)             -->
   <!-- ========================================== -->
-  <main id="student-view" class="flex-1 flex flex-col p-4 max-w-md mx-auto w-full justify-center">
+  <main id="student-view" class="flex-1 flex flex-col p-4 max-w-lg mx-auto w-full justify-center">
 
     <!-- Screen 1: Nhập họ tên -->
-    <section id="student-screen-name" class="w-full bg-slate-800/80 p-6 rounded-3xl border border-slate-700/80 shadow-2xl">
+    <section id="student-screen-name" class="w-full flex flex-col bg-slate-800/80 p-6 sm:p-8 rounded-3xl border border-slate-700/80 shadow-2xl">
       <div class="text-center mb-6">
         <div class="w-16 h-16 bg-indigo-500/20 text-indigo-400 rounded-2xl mx-auto flex items-center justify-center text-3xl font-bold mb-3 border border-indigo-500/30">
           ⚛️
@@ -127,24 +127,25 @@
         </div>
       </div>
 
-      <form id="form-join" class="space-y-4" onsubmit="event.preventDefault();">
+      <form id="form-join" class="space-y-5" onsubmit="event.preventDefault();">
         <div>
-          <label for="input-student-name" class="block text-xs font-semibold uppercase text-slate-300 tracking-wider mb-2">
-            Họ và tên của bạn
+          <label for="input-student-name" class="block text-sm sm:text-base font-bold uppercase text-slate-200 tracking-wider mb-2.5">
+            Họ và tên của học sinh
           </label>
           <input 
             type="text" 
             id="input-student-name" 
             placeholder="Ví dụ: Nguyễn Văn An - 10A1" 
             required 
-            maxlength="35"
-            class="w-full px-4 py-3.5 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent text-base transition"
+            maxlength="60"
+            class="w-full px-5 py-4 bg-slate-900 border-2 border-slate-700 focus:border-cyan-400 focus:ring-4 focus:ring-cyan-400/20 rounded-2xl text-white placeholder-slate-500 text-lg font-medium shadow-inner transition outline-none"
           />
+          <p class="text-[11px] text-slate-400 mt-1.5 pl-1">Gõ đầy đủ Họ tên kèm Lớp để hệ thống ghi nhận vào bảng xếp hạng</p>
         </div>
         <button 
           type="submit" 
           id="btn-join-submit"
-          class="w-full py-4 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 active:scale-95 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/20 transition text-base"
+          class="w-full py-4 px-6 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 active:scale-95 text-white font-extrabold rounded-2xl shadow-lg shadow-indigo-500/25 transition text-lg tracking-wide"
         >
           Vào Trận Đấu
         </button>

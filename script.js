@@ -464,10 +464,10 @@
       if (el) {
         if (id === screenId) {
           el.classList.remove("hidden");
-          el.classList.add("flex");
+          el.classList.add("flex", "flex-col");
         } else {
           el.classList.add("hidden");
-          el.classList.remove("flex");
+          el.classList.remove("flex", "flex-col");
         }
       }
     });

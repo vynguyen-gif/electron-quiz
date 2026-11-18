@@ -1,0 +1,9 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/teacher",
+      "destination": "/index.html?view=teacher"
+    }
+  ]
+}

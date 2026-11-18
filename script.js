@@ -314,6 +314,14 @@
       teacherView.classList.remove("flex");
     }
 
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get("new") === "true") {
+      sessionStorage.removeItem("chem_student_id");
+      sessionStorage.removeItem("chem_student_name");
+      sessionStorage.removeItem("chem_student_score");
+      sessionStorage.removeItem("chem_current_index");
+    }
+
     const savedStudentId = sessionStorage.getItem("chem_student_id");
     const savedStudentName = sessionStorage.getItem("chem_student_name");
     const savedQuestionIndex = sessionStorage.getItem("chem_current_index");
@@ -401,6 +409,35 @@
         }
       });
     }
+
+    const btnRestart = document.getElementById("btn-restart-student");
+    if (btnRestart) {
+      btnRestart.addEventListener("click", () => {
+        resetStudentSession();
+      });
+    }
+  }
+
+  function resetStudentSession() {
+    sessionStorage.removeItem("chem_student_id");
+    sessionStorage.removeItem("chem_student_name");
+    sessionStorage.removeItem("chem_student_score");
+    sessionStorage.removeItem("chem_current_index");
+    currentStudentId = null;
+    currentStudentName = "";
+    currentQuestionIndex = 0;
+    currentTotalScore = 0;
+
+    const nameInput = document.getElementById("input-student-name");
+    if (nameInput) {
+      nameInput.value = "";
+    }
+    const btnSubmit = document.getElementById("btn-join-submit");
+    if (btnSubmit) {
+      btnSubmit.disabled = false;
+      btnSubmit.innerText = "Vào Trận Đấu";
+    }
+    showScreen("student-screen-name");
   }
 
   function showScreen(screenId) {
